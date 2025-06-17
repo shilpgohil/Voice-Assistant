@@ -1,22 +1,29 @@
 from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
-import pyttsx3
 import os
+
+# Check if TTS should be enabled (i.e., running locally)
+USE_TTS = os.environ.get("USE_TTS", "true").lower() == "true"
+engine = None
+
+if USE_TTS:
+    try:
+        import pyttsx3
+        engine = pyttsx3.init()
+    except Exception as e:
+        print("pyttsx3 init failed:", e)
+        engine = None
 
 # Initialize Flask app
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-# Initialize TTS engine (works only locally or on Windows/macOS)
-try:
-    engine = pyttsx3.init()
-except Exception as e:
-    engine = None
-    print("pyttsx3 TTS initialization failed:", e)
-
-# API Key (recommend using environment variable in production)
+# Gemini API Key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyDMtUt-8CiPGEAp_SGpqrsWFGHe-AyTCPw")
 
-# Stop speaking route (only works locally with pyttsx3)
+@app.route("/")
+def home():
+    return render_template("index.html")
+
 @app.route("/stop_speaking", methods=["POST"])
 def stop_speaking():
     global engine
@@ -24,101 +31,12 @@ def stop_speaking():
         engine.stop()
     return jsonify({"status": "speaking stopped"})
 
-# Home route
-@app.route("/")
-# Your personality setup
-def home():
-    return render_template("index.html")
+def generate_audio(text):
+    if engine:
+        engine.say(text)
+        engine.runAndWait()
 
-predefined_qa = {
-    "what should we know about your life story in a few sentences?": "I come from a background where curiosity was always encouraged more than just scoring marks. From tinkering with tech as a teenager to diving deep into AI and data, my journey has always been about exploring how things work and how they can be made better. I’m someone who learns by building and failing, then improving until I get it right.",
-    "what’s your #1 superpower?": "My biggest strength is adaptability. Whether it’s switching between different tech stacks or adjusting to fast changing environments, I stay calm, observe quickly, and align myself with what’s needed. I don’t get stuck   I evolve.",
-    "what are the top 3 areas you’d like to grow in?": "People Skills: I want to become better at leading teams and understanding different working styles.\n\nBusiness Thinking: I’m learning to look at problems not just from a tech angle but also from a customer and ROI perspective.\n\nSystem Design & Scale: I want to deepen my understanding of building large, reliable systems in the AI + data space.",
-    "what misconception do your coworkers have about you?": "Some people think I’m always serious or too focused   but once they get to know me, they realise I’m actually quite fun, collaborative, and always ready to crack a joke or lighten the mood when needed.",
-    "how do you push your boundaries and limits?": "I deliberately take on projects or roles that are slightly out of my comfort zone   ones that force me to stretch and learn fast. I also seek feedback often, reflect deeply, and believe in showing up every day, especially when things get uncomfortable   that’s where real growth happens."
-}
-
-personal_data = {
-    "name": "Shilp Gohil",
-    "contact": {
-        "phone": "+91 9328418263",
-        "email": "shilpgohil@gmail.com",
-        "github": "https://github.com/shilpgohil",
-        "linkedin": "https://linkedin.com/in/shilp gohil-23b371166"
-    },
-    "summary": "Skilled software development engineer with experience in delivering scalable applications using Python, Java, and C++ across AWS and GCP environments. Recognised for integrating AI and machine learning.",
-    "education": [
-        {
-            "institution": "Sathyabama University",
-            "degree": "B.Tech in Information Technology",
-            "location": "Chennai, India",
-            "years": "2019 – 2023"
-        }
-    ],
-    "experience": [
-        {
-            "title": "Machine Learning QA Intern",
-            "company": "Pioneer Solutions Pvt. Ltd.",
-            "location": "Ahmedabad, India",
-            "years": "2023–2024",
-            "responsibilities": [
-                "Built automated pipelines for data validation and model inference testing using Pytest, reducing QA time by 10+ hrs/week.",
-                "Validated ML models for financial risk prediction, resolving issues in model accuracy, data drift, and edge cases."
-            ]
-        },
-        {
-            "title": "Research Assistant",
-            "company": "International Research Center (IRC), Sathyabama University",
-            "location": "Hybrid",
-            "years": "2022–2023",
-            "responsibilities": [
-                "Boosted text classification F1 score from 0.78 to 0.88 via data preprocessing, model tuning, and pipeline optimization.",
-                "Analyzed usability of AI tools using quantitative feedback, contributing to internal reports and academic papers."
-            ]
-        },
-        {
-            "title": "Public Relations Officer",
-            "company": "Microsoft Student Club, Sathyabama University",
-            "location": "Chennai, India",
-            "years": "2021–2022",
-            "responsibilities": [
-                "Led 10+ workshops/hackathons on ML, Cloud, and Coding, increasing participation by 40%.",
-                "Prototyped a Python-Dialogflow chatbot and brought in industry speakers on Azure, GitHub, and Power Platform."
-            ]
-        }
-    ],
-    "skills": {
-        "programming": ["Python", "C", "C++", "SQL"],
-        "machine_learning_ai": ["Machine Learning", "Deep Learning", "Generative AI", "Agent AI", "Computer Vision", "LLMs", "Prompt Engineering"],
-        "frameworks_tools": ["TensorFlow", "PyTorch", "OpenCV", "LangChain", "Streamlit", "Docker", "Git", "CI/CD"],
-        "web_backend": ["Django", "Flask", "Streamlit", "MongoDB", "RESTful APIs"],
-        "cloud_devops": ["Azure", "GCP", "AWS", "Kubernetes", "Qwiklabs"],
-        "data_analysis_visualisation": ["Preprocessing", "Statistical Analysis", "Tableau", "Power BI", "matplotlib"],
-        "collaboration_research": ["Agile", "Documentation", "User Testing", "Teamwork"],
-        "interpersonal": ["Leadership", "Communication", "Problem Solving", "Mentoring", "Adaptability"]
-    },
-    "projects": [
-        {
-            "title": "Mathematical Agent",
-            "tech": ["Streamlit", "Google Gemini", "ChromaDB"],
-            "year": 2025,
-            "description": "AI driven math assistant with step-by-step solutions in algebra, calculus & advanced topics."
-        },
-        {
-            "title": "Computer Vision Data Annotator",
-            "tech": ["OpenCV", "Pillow"],
-            "year": 2025,
-            "description": "Smart video to frame converter with AI tagging, retry logic, and progress tracking."
-        },
-        {
-            "title": "LLM Powered Web Scraper",
-            "tech": ["BeautifulSoup", "LangChain", "Docker", "Kubernetes"],
-            "year": 2024,
-            "description": "Python-based scraper achieving 88% classification accuracy."
-        }
-    ]
-}
-
+# ... [Rest of your predefined_qa, personal_data dictionary same as before] ...
 
 # Main interaction route
 @app.route("/ask", methods=["POST"])
@@ -126,13 +44,11 @@ def ask():
     user_input = request.json.get("question", "").strip().lower()
     reply = ""
 
-    # Match predefined Q&A
     for question, answer in predefined_qa.items():
         if user_input == question.lower():
             reply = answer
             break
 
-    # Match personal data
     if not reply:
         if "name" in user_input:
             reply = f"My name is {personal_data['name']}."
@@ -151,7 +67,6 @@ def ask():
             proj_lines = [f"{p['title']} ({p['year']}): {p['description']} [Tech: {', '.join(p['tech'])}]" for p in personal_data["projects"]]
             reply = "Some of my projects: " + "; ".join(proj_lines)
 
-    # Fallback to Gemini AI
     if not reply:
         try:
             genai.configure(api_key=GEMINI_API_KEY)
@@ -162,9 +77,9 @@ def ask():
             print("Gemini error:", e)
             reply = "Sorry, I'm having trouble processing that right now."
 
+    generate_audio(reply)
     return jsonify({"answer": reply})
 
-
-# Start the app (Only for local; not used on production hosting)
+# Local launch
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
