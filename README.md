@@ -1,0 +1,123 @@
+# Voice Assistant
+
+## Introduction
+Voice Assistant is an advanced AI-powered assistant that helps users with various queries. Built with Flask and powered by Google's Gemini model, it provides responses based on predefined data and leverages the Gemini API for more general questions.
+
+## Features
+- **Conversational AI**: Interact with the assistant using natural language.
+- **Personalized Responses**: Provides information about Shilp Gohil based on predefined data.
+- **Gemini Integration**: Utilizes Google Gemini API for advanced question answering.
+- **Text-to-Speech**: Speaks out responses using `pyttsx3`.
+- **Web Interface**: A simple web interface for interaction.
+
+## Installation
+
+To set up the project locally, follow these steps:
+
+1.  **Clone this repository**:
+
+    ```bash
+    git clone https://github.com/your-username/Voice-Assistant.git
+    cd Voice-Assistant
+    ```
+
+2.  **Create a virtual environment** (recommended):
+
+    ```bash
+    python -m venv venv
+    .\venv\Scripts\activate
+    ```
+
+3.  **Install dependencies**:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Set up your Gemini API Key**:
+
+    Create a `.env` file in the root directory of the project and add your Gemini API Key:
+
+    ```
+    GEMINI_API_KEY='YOUR_GEMINI_API_KEY'
+    ```
+
+    Alternatively, you can directly replace the placeholder in `main.py`:
+
+    ```python
+    GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY' # Replace with your actual Gemini API Key
+    ```
+
+## Usage
+
+To run the application, execute `main.py`:
+
+```bash
+python main.py
+```
+
+The application will typically run on `http://127.0.0.1:5000/`. Open this URL in your web browser to interact with the voice assistant.
+
+## Building an Executable (for distribution)
+
+To create a standalone executable that can be run without installing Python or dependencies, you can use `PyInstaller`.
+
+1.  **Ensure PyInstaller is installed** (it should be if you followed the `requirements.txt` installation):
+
+    ```bash
+    pip install pyinstaller
+    ```
+
+2.  **Build the executable**:
+
+    Navigate to the project's root directory in your terminal and run:
+
+    ```bash
+    pyinstaller --onefile --add-data "static;static" --add-data "templates;templates" --add-data ".env;." main.py
+    ```
+
+    -   `--onefile`: Creates a single executable file.
+    -   `--add-data "static;static"`: Includes the `static` folder and its contents.
+    -   `--add-data "templates;templates"`: Includes the `templates` folder and its contents.
+    -   `--add-data ".env;."`: Includes the `.env` file in the root of the executable's temporary directory.
+
+    After successful execution, the executable will be found in the `dist/` directory.
+
+## Project Structure
+
+```
+Voice Assistant/
+├── .env
+├── main.py
+├── requirements.txt
+├── static/
+│   ├── script.js
+│   └── style.css
+└── templates/
+    └── index.html
+```
+
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+1.  Fork the repository
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Acknowledgments
+
+-   Google Gemini API
+-   Flask
+-   pyttsx3
+-   PyInstaller
+
+## Contact
+
+@shilpgohil@gmail.com
