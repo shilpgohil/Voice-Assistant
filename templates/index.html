@@ -47,11 +47,11 @@
     const sendButton = document.getElementById("send-button");
     const chatBox = document.getElementById("chat-box");
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const isSpeechSupported = 'webkitSpeechRecognition' in window;
     let recognition;
 
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
+    if (isSpeechSupported) {
+      recognition = new webkitSpeechRecognition();
       recognition.continuous = false;
       recognition.lang = 'en-IN';
 
