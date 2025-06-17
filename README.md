@@ -34,18 +34,18 @@ To set up the project locally, follow these steps:
     pip install -r requirements.txt
     ```
 
-4.  **Set up your Ai model API Key**:
+4.  **Set up your Gemini API Key**:
 
     Create a `.env` file in the root directory of the project and add your Gemini API Key:
 
     ```
-    YOUR_API_KEY='YOUR_AI_API_KEY'
+    GEMINI_API_KEY='YOUR_GEMINI_API_KEY'
     ```
 
     Alternatively, you can directly replace the placeholder in `main.py`:
 
-    ```python\
-    API_KEY = 'YOUR_API_KEY' # Replace with your actual Ai Model API Key
+    ```python
+    GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY' # Replace with your actual Gemini API Key
     ```
 
 ## Usage
@@ -58,30 +58,52 @@ python main.py
 
 The application will typically run on `http://127.0.0.1:5000/`. Open this URL in your web browser to interact with the voice assistant.
 
-## Building an Executable (for distribution)
+### Building an Executable
 
-To create a standalone executable that can be run without installing Python or dependencies, you can use `PyInstaller`.
+To create a standalone executable of the voice assistant using PyInstaller, follow these steps:
 
-1.  **Ensure PyInstaller is installed** (it should be if you followed the `requirements.txt` installation):
+1.  **Install PyInstaller** (if you haven't already):
 
     ```bash
     pip install pyinstaller
     ```
 
-2.  **Build the executable**:
+2.  **Build the Executable**:
 
-    Navigate to the project's root directory in your terminal and run:
+    Run the following command in your project's root directory:
 
     ```bash
     pyinstaller --onefile --add-data "static;static" --add-data "templates;templates" --add-data ".env;." main.py
     ```
 
-    -   `--onefile`: Creates a single executable file.
-    -   `--add-data "static;static"`: Includes the `static` folder and its contents.
-    -   `--add-data "templates;templates"`: Includes the `templates` folder and its contents.
-    -   `--add-data ".env;."`: Includes the `.env` file in the root of the executable's temporary directory.
+    This command will create a single executable file in the `dist/` directory, along with the `static`, `templates`, and `.env` files bundled within it.
 
-    After successful execution, the executable will be found in the `dist/` directory.
+    *   `--onefile`: Creates a single executable file.
+    *   `--add-data "static;static"`: Includes the `static` folder and its contents.
+    *   `--add-data "templates;templates"`: Includes the `templates` folder and its contents.
+    *   `--add-data ".env;."`: Includes the `.env` file.
+
+    The executable will be located in the `dist` folder.
+
+### Deploying to Vercel
+
+This project can be easily deployed to Vercel. A `vercel.json` file is included to configure the deployment.
+
+1.  **Install Vercel CLI** (if you haven't already):
+
+    ```bash
+    npm install -g vercel
+    ```
+
+2.  **Deploy Your Project**:
+
+    Navigate to your project's root directory in the terminal and run:
+
+    ```bash
+    vercel
+    ```
+
+    Follow the prompts to deploy your project. Vercel will automatically detect the `vercel.json` configuration and deploy your Flask application.
 
 ## Project Structure
 
@@ -117,7 +139,7 @@ Click the link : https://drive.google.com/file/d/1DdqDwN8Z0dnC_5qQl48y7J_ErnxlSz
 
 ## Acknowledgments
 
--   Google Gemini API
+-   AI Model API
 -   Flask
 -   pyttsx3
 -   PyInstaller
@@ -125,3 +147,4 @@ Click the link : https://drive.google.com/file/d/1DdqDwN8Z0dnC_5qQl48y7J_ErnxlSz
 ## Contact
 
 @shilpgohil@gmail.com
++919328418263
