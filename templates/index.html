@@ -1,86 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Chatbot</title>
-    <link rel="stylesheet" href="static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Voice Assistant by Shilp Gohil</title>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-box" id="chat-box"></div>
-        <div class="input-container">
-            <button id="mic-button">🎤 Speak</button>
-            <input type="text" id="user-input" placeholder="Type your message...">
-            <button id="send-button">Send</button>
-        </div>
-    </div>
+  <h1>🎙️ Voice Assistant</h1>
+  <button id="mic-btn">Tap to Speak</button>
+  <p id="output">Waiting for input...</p>
 
-    <script>
-        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-        const micButton = document.getElementById('mic-button');
-        const sendButton = document.getElementById('send-button');
-        const userInput = document.getElementById('user-input');
-        const chatBox = document.getElementById('chat-box');
+  <script>
+    const micBtn = document.getElementById("mic-btn");
+    const output = document.getElementById("output");
 
-        function addMessage(sender, text) {
-            const div = document.createElement('div');
-            div.className = sender;
-            div.textContent = `${sender}: ${text}`;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        async function sendMessage(text) {
-            addMessage("You", text);
-            const response = await fetch("/ask", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: text })
-            });
-            const data = await response.json();
-            addMessage("Bot", data.answer);
-        }
+    if (!SpeechRecognition) {
+      output.textContent = "Your browser doesn't support Speech Recognition.";
+      micBtn.disabled = true;
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
 
-        sendButton.addEventListener('click', () => {
-            const text = userInput.value.trim();
-            if (text) {
-                sendMessage(text);
-                userInput.value = "";
-            }
+      micBtn.addEventListener("click", () => {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(() => {
+            recognition.start();
+            output.textContent = "Listening...";
+          })
+          .catch((err) => {
+            alert("Microphone access denied. Please allow microphone permission.");
+            console.error("Mic access error:", err);
+          });
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        output.textContent = "You said: " + transcript;
+
+        // Optional: Send this transcript to Flask backend
+        /*
+        fetch("/your-endpoint", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcript: transcript })
+        }).then(res => res.json()).then(data => {
+          console.log(data);
         });
+        */
+      };
 
-        userInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") sendButton.click();
-        });
-
-        if (isLocal && 'webkitSpeechRecognition' in window) {
-            const recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.lang = 'en-US';
-
-            micButton.onclick = () => {
-                recognition.start();
-                micButton.textContent = "🎙️ Listening...";
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                userInput.value = transcript;
-                micButton.textContent = "🎤 Speak";
-                sendButton.click();
-            };
-
-            recognition.onerror = (event) => {
-                console.error("Speech Recognition Error:", event.error);
-                micButton.textContent = "🎤 Speak";
-                alert("Microphone access failed or not available.");
-            };
-        } else {
-            // Disable mic button on Render or unsupported browsers
-            micButton.disabled = true;
-            micButton.textContent = "🎤 Mic not available";
-        }
-    </script>
+      recognition.onerror = (event) => {
+        console.error("Speech recognition error:", event.error);
+        output.textContent = "Error: " + event.error;
+      };
+    }
+  </script>
 </body>
 </html>
