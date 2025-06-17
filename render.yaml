@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: voice-bot
+    env: python
+    buildCommand: ""
+    startCommand: gunicorn app:app
+    runtime: python
+    region: singapore
+    plan: free
