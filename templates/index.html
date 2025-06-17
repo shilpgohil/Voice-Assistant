@@ -10,11 +10,77 @@
     <div class="chat-container">
         <div class="chat-box" id="chat-box"></div>
         <div class="input-container">
-            <button id="mic-button">Start Speaking</button>
-            <input type="text" id="user-input" placeholder="Type your message..." disabled>
-            <button id="send-button" disabled>Send</button>
+            <button id="mic-button">🎤 Speak</button>
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-button">Send</button>
         </div>
     </div>
-    <script src="static/script.js"></script>
+
+    <script>
+        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        const micButton = document.getElementById('mic-button');
+        const sendButton = document.getElementById('send-button');
+        const userInput = document.getElementById('user-input');
+        const chatBox = document.getElementById('chat-box');
+
+        function addMessage(sender, text) {
+            const div = document.createElement('div');
+            div.className = sender;
+            div.textContent = `${sender}: ${text}`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function sendMessage(text) {
+            addMessage("You", text);
+            const response = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: text })
+            });
+            const data = await response.json();
+            addMessage("Bot", data.answer);
+        }
+
+        sendButton.addEventListener('click', () => {
+            const text = userInput.value.trim();
+            if (text) {
+                sendMessage(text);
+                userInput.value = "";
+            }
+        });
+
+        userInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") sendButton.click();
+        });
+
+        if (isLocal && 'webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+
+            micButton.onclick = () => {
+                recognition.start();
+                micButton.textContent = "🎙️ Listening...";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+                micButton.textContent = "🎤 Speak";
+                sendButton.click();
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error:", event.error);
+                micButton.textContent = "🎤 Speak";
+                alert("Microphone access failed or not available.");
+            };
+        } else {
+            // Disable mic button on Render or unsupported browsers
+            micButton.disabled = true;
+            micButton.textContent = "🎤 Mic not available";
+        }
+    </script>
 </body>
 </html>
