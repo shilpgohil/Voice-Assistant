@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
 import os
 
-# Check if TTS should be enabled (i.e., running locally)
+# Check if TTS should be enabled (True = local; False = server/Render)
 USE_TTS = os.environ.get("USE_TTS", "true").lower() == "true"
 engine = None
 
@@ -11,7 +11,7 @@ if USE_TTS:
         import pyttsx3
         engine = pyttsx3.init()
     except Exception as e:
-        print("pyttsx3 init failed:", e)
+        print("pyttsx3 initialization failed:", e)
         engine = None
 
 # Initialize Flask app
@@ -20,23 +20,33 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 # Gemini API Key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyDMtUt-8CiPGEAp_SGpqrsWFGHe-AyTCPw")
 
+# Home route
 @app.route("/")
 def home():
     return render_template("index.html")
 
+# Stop speaking
 @app.route("/stop_speaking", methods=["POST"])
 def stop_speaking():
     global engine
-    if engine and engine._inLoop:
-        engine.stop()
+    if engine:
+        try:
+            engine.stop()
+        except:
+            pass
     return jsonify({"status": "speaking stopped"})
 
+# TTS
 def generate_audio(text):
     if engine:
-        engine.say(text)
-        engine.runAndWait()
+        try:
+            engine.say(text)
+            engine.runAndWait()
+        except:
+            pass
 
-# ... [Rest of your predefined_qa, personal_data dictionary same as before] ...
+# --- Predefined Q&A and Personal Info (same as before, add here) ---
+# paste your `predefined_qa = {...}` and `personal_data = {...}` here
 
 # Main interaction route
 @app.route("/ask", methods=["POST"])
@@ -52,7 +62,7 @@ def ask():
     if not reply:
         if "name" in user_input:
             reply = f"My name is {personal_data['name']}."
-        elif any(key in user_input for key in ["contact", "phone", "email", "github", "linkedin"]):
+        elif any(k in user_input for k in ["contact", "phone", "email", "github", "linkedin"]):
             c = personal_data["contact"]
             reply = f"Phone: {c['phone']}, Email: {c['email']}, GitHub: {c['github']}, LinkedIn: {c['linkedin']}"
         elif "summary" in user_input or "experience" in user_input:
@@ -80,6 +90,6 @@ def ask():
     generate_audio(reply)
     return jsonify({"answer": reply})
 
-# Local launch
+# Run locally
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)
