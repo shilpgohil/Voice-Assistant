@@ -1,61 +1,54 @@
-<script>
-  const micButton = document.getElementById("mic-button");
-  const userInput = document.getElementById("user-input");
-  const sendButton = document.getElementById("send-button");
-  const chatBox = document.getElementById("chat-box");
+const micButton = document.getElementById("mic-button");
+const userInput = document.getElementById("user-input");
+const sendButton = document.getElementById("send-button");
+const chatBox = document.getElementById("chat-box");
 
-  const isSpeechSupported = 'webkitSpeechRecognition' in window;
-  let recognition;
-  let isListening = false;
+// Check for speech recognition support
+const isSpeechSupported = 'webkitSpeechRecognition' in window;
+let recognition;
 
-  if (isSpeechSupported) {
+if (isSpeechSupported) {
     recognition = new webkitSpeechRecognition();
     recognition.continuous = false;
     recognition.lang = 'en-IN';
 
     recognition.onstart = () => {
-      isListening = true;
-      micButton.textContent = "🎙️ Listening...";
+        micButton.textContent = "🎙️ Listening...";
     };
 
     recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      userInput.value = transcript;
-      sendButton.click();
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript;
+        sendButton.click();
+        micButton.textContent = "Start Speaking";
     };
 
     recognition.onerror = (event) => {
-      console.error("Speech error:", event.error);
-      micButton.textContent = "Mic Error";
-      isListening = false;
+        console.error("Speech error:", event.error);
+        micButton.textContent = "Mic Error";
     };
 
     recognition.onend = () => {
-      micButton.textContent = "Start Speaking";
-      isListening = false;
+        micButton.textContent = "Start Speaking";
     };
 
     micButton.onclick = () => {
-      if (isListening) {
-        recognition.stop(); // Stop if already listening
-        return;
-      }
-
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(() => {
-          recognition.start();
-        })
-        .catch(err => {
-          alert("Microphone access is required.");
-          console.error("Mic permission error:", err);
-        });
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(() => {
+                recognition.start();
+            })
+            .catch(err => {
+                alert("Microphone access is required.");
+                console.error("Mic permission error:", err);
+            });
     };
-  } else {
+} else {
     micButton.disabled = true;
     micButton.textContent = "🎤 Mic not supported";
-  }
+}
 
-  sendButton.onclick = async () => {
+// Send text to backend
+sendButton.onclick = async () => {
     const question = userInput.value.trim();
     if (!question) return;
 
@@ -64,37 +57,38 @@
     sendButton.disabled = true;
 
     try {
-      const res = await fetch("/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question })
-      });
+        const res = await fetch("/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question })
+        });
 
-      const data = await res.json();
-      addMessage("bot", data.answer);
-      speakText(data.answer);
+        const data = await res.json();
+        addMessage("bot", data.answer);
+        speakText(data.answer);
     } catch (err) {
-      console.error("Error:", err);
-      addMessage("bot", "Sorry, there was a network issue.");
+        console.error("Error:", err);
+        addMessage("bot", "Sorry, there was a network issue.");
     } finally {
-      sendButton.disabled = false;
+        sendButton.disabled = false;
     }
-  };
+};
 
-  function addMessage(sender, text) {
+// Add chat messages to UI
+function addMessage(sender, text) {
     const msg = document.createElement("div");
     msg.className = sender;
     msg.textContent = text;
     chatBox.appendChild(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
-  }
+}
 
-  function speakText(text) {
+// Browser speech synthesis for speaking bot replies
+function speakText(text) {
     const synth = window.speechSynthesis;
     if (!synth) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-IN';
     synth.speak(utterance);
-  }
-</script>
+}
