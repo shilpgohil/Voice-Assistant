@@ -4,35 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voice Assistant by Shilp Gohil</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    #chat-box {
-      max-width: 600px;
-      margin: 20px auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 8px;
-      height: 300px;
-      overflow-y: auto;
-      background-color: #f9f9f9;
-    }
-    .user, .bot {
-      padding: 5px;
-      margin: 5px;
-    }
-    .user {
-      text-align: right;
-      color: blue;
-    }
-    .bot {
-      text-align: left;
-      color: green;
-    }
-  </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <h1>🎙️ Voice Assistant by Shilp Gohil</h1>
