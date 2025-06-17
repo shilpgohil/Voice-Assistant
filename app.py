@@ -3,7 +3,7 @@ import google.generativeai as genai
 import os
 
 # Load Gemini API Key securely
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GEMINI_API_KEY = os.environ.get("AIzaSyDMtUt-8CiPGEAp_SGpqrsWFGHe-AyTCPw")
 
 app = Flask(__name__)
 
