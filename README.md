@@ -111,7 +111,7 @@ We welcome contributions! Please follow these steps:
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## Demoo Video
+## Demo Video
 
 Click the link : https://drive.google.com/file/d/1DdqDwN8Z0dnC_5qQl48y7J_ErnxlSzKU/view?usp=sharing
 
