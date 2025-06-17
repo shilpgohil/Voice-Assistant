@@ -2,128 +2,89 @@ from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
 import os
 
-# Check if running locally
-IS_LOCAL = os.environ.get("RENDER") is None
+# Load Gemini API Key securely
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# Flask App
 app = Flask(__name__)
 
-# Text-to-Speech (only local)
-if IS_LOCAL:
-    import pyttsx3
-    engine = pyttsx3.init()
-
-# Gemini API Key
-GEMINI_API_KEY = 'AIzaSyDMtUt-8CiPGEAp_SGpqrsWFGHe-AyTCPw'  # Replace with valid key
-
-# Stop speech endpoint (only local)
-@app.route("/stop_speaking", methods=["POST"])
-def stop_speaking():
-    if IS_LOCAL and engine._inLoop:
-        engine.stop()
-    return jsonify({"status": "speaking stopped"})
-
-# Predefined responses
+# Personality setup
 predefined_qa = {
     "what should we know about your life story in a few sentences?": "I come from a background where curiosity was always encouraged...",
     "what’s your #1 superpower?": "My biggest strength is adaptability...",
-    "what are the top 3 areas you’d like to grow in?": "People Skills: I want to become better at leading teams...",
+    "what are the top 3 areas you’d like to grow in?": "People Skills, Business Thinking, System Design & Scale...",
     "what misconception do your coworkers have about you?": "Some people think I’m always serious...",
-    "how do you push your boundaries and limits?": "I deliberately take on projects that are slightly out of my comfort zone..."
+    "how do you push your boundaries and limits?": "I take on slightly uncomfortable projects..."
 }
 
-# Personal data
 personal_data = {
     "name": "Shilp Gohil",
     "contact": {
         "phone": "+91 9328418263",
         "email": "shilpgohil@gmail.com",
         "github": "https://github.com/shilpgohil",
-        "linkedin": "https://linkedin.com/in/shilpgohil-23b371166"
+        "linkedin": "https://linkedin.com/in/shilp gohil-23b371166"
     },
-    "summary": "Skilled software development engineer with experience...",
-    "education": [
-        {
-            "institution": "Sathyabama University",
-            "degree": "B.Tech in Information Technology",
-            "location": "Chennai, India",
-            "years": "2019 – 2023"
-        }
-    ],
-    "experience": [],  # Simplified
-    "skills": {
-        "programming": ["Python", "C", "C++", "SQL"],
-        "machine_learning_ai": ["Machine Learning", "Deep Learning", "Generative AI"],
-        "frameworks_tools": ["TensorFlow", "PyTorch", "OpenCV"],
-        "web_backend": ["Django", "Flask", "Streamlit"],
-        "cloud_devops": ["Azure", "GCP", "AWS"],
-        "data_analysis_visualisation": ["Tableau", "Power BI"],
-        "interpersonal": ["Leadership", "Communication"]
-    },
-    "projects": [
-        {
-            "title": "Mathematical Agent",
-            "tech": ["Streamlit", "Google Gemini", "ChromaDB"],
-            "year": 2025,
-            "description": "AI driven math assistant..."
-        }
-    ]
+    "summary": "Skilled software development engineer...",
+    "education": [{
+        "institution": "Sathyabama University",
+        "degree": "B.Tech in Information Technology",
+        "location": "Chennai, India",
+        "years": "2019 – 2023"
+    }],
+    "experience": [...],  # Keep your actual data here
+    "skills": {...},      # Same here
+    "projects": [...]     # And here
 }
 
-# Home route
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# Ask route
 @app.route("/ask", methods=["POST"])
 def ask():
-    user_input = request.json['question']
+    user_input = request.json.get('question', '').lower().strip()
     reply = ""
 
-    # Predefined answers
+    # 1. Predefined Q&A
     for question, answer in predefined_qa.items():
-        if user_input.lower().strip() == question.lower():
+        if user_input == question.lower():
             reply = answer
             break
 
-    # Personal info responses
+    # 2. Personal Data Fallback
     if not reply:
-        text = user_input.lower()
-        if "name" in text:
+        if "name" in user_input:
             reply = f"My name is {personal_data['name']}."
-        elif any(k in text for k in ["contact", "phone", "email", "github", "linkedin"]):
-            c = personal_data['contact']
+        elif any(k in user_input for k in ["contact", "phone", "email", "github", "linkedin"]):
+            c = personal_data["contact"]
             reply = f"You can reach me at phone: {c['phone']}, email: {c['email']}, GitHub: {c['github']}, or LinkedIn: {c['linkedin']}."
-        elif "summary" in text or "experience" in text:
-            reply = personal_data['summary']
-        elif "education" in text:
-            e = personal_data['education'][0]
-            reply = f"I have a {e['degree']} from {e['institution']} in {e['location']} ({e['years']})."
-        elif "skills" in text:
-            skills = [f"{k.replace('_', ' ').title()}: {', '.join(v)}" for k, v in personal_data['skills'].items()]
-            reply = "My skills include: " + "; ".join(skills) + "."
-        elif "projects" in text:
-            reply = "Here are some of my projects: " + "; ".join([
+        elif "summary" in user_input or "experience" in user_input:
+            reply = personal_data["summary"]
+        elif "education" in user_input:
+            edu = personal_data["education"][0]
+            reply = f"I have a {edu['degree']} from {edu['institution']} in {edu['location']} ({edu['years']})."
+        elif "skills" in user_input:
+            reply = "My skills include: " + "; ".join(
+                f"{k.replace('_', ' ').title()}: {', '.join(v)}" for k, v in personal_data["skills"].items()
+            ) + "."
+        elif "projects" in user_input:
+            reply = "Here are my projects: " + "; ".join(
                 f"{p['title']} ({p['year']}): {p['description']} (Tech: {', '.join(p['tech'])})"
-                for p in personal_data['projects']
-            ]) + "."
+                for p in personal_data["projects"]
+            )
 
-    # Gemini fallback
-    if not reply:
-        prompt = f"Act like Shilp Gohil and answer this question: {user_input}"
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(prompt)
-        reply = response.text
-
-    # Speak if local
-    if IS_LOCAL:
-        engine.say(reply)
-        engine.runAndWait()
+    # 3. Use Gemini if no matches
+    if not reply and GEMINI_API_KEY:
+        try:
+            prompt = f"Act like Shilp Gohil and answer this: {user_input}"
+            genai.configure(api_key=GEMINI_API_KEY)
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            reply = response.text
+        except Exception as e:
+            reply = "Sorry, Gemini API failed. Try again later."
 
     return jsonify({"answer": reply})
 
-# Start the app
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
