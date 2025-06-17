@@ -1,9 +1,0 @@
-*.mp3
-*.wav
-*.pkl
-*.pt
-__pycache__/
-*.ipynb_checkpoints
-venv/
-.env
-*.log
