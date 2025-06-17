@@ -34,18 +34,18 @@ To set up the project locally, follow these steps:
     pip install -r requirements.txt
     ```
 
-4.  **Set up your Gemini API Key**:
+4.  **Set up your Ai model API Key**:
 
     Create a `.env` file in the root directory of the project and add your Gemini API Key:
 
     ```
-    GEMINI_API_KEY='YOUR_GEMINI_API_KEY'
+    YOUR_API_KEY='YOUR_AI_API_KEY'
     ```
 
     Alternatively, you can directly replace the placeholder in `main.py`:
 
-    ```python
-    GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY' # Replace with your actual Gemini API Key
+    ```python\
+    API_KEY = 'YOUR_API_KEY' # Replace with your actual Ai Model API Key
     ```
 
 ## Usage
@@ -110,6 +110,10 @@ We welcome contributions! Please follow these steps:
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
+
+## Demoo Video
+
+Click the link : https://drive.google.com/file/d/1DdqDwN8Z0dnC_5qQl48y7J_ErnxlSzKU/view?usp=sharing
 
 ## Acknowledgments
 
