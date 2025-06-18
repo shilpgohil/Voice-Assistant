@@ -1,24 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
-import pyttsx3
 import os
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
-try:
-    engine = pyttsx3.init()
-except Exception as e:
-    engine = None
-    print("pyttsx3 TTS initialization failed:", e)
-
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyDMtUt-8CiPGEAp_SGpqrsWFGHe-AyTCPw")
-
-@app.route("/stop_speaking", methods=["POST"])
-def stop_speaking():
-    global engine
-    if engine and engine._inLoop:
-        engine.stop()
-    return jsonify({"status": "speaking stopped"})
 
 @app.route("/")
 def home():
@@ -26,10 +12,10 @@ def home():
 
 predefined_qa = {
     "what should we know about your life story in a few sentences?": "I come from a background where curiosity was always encouraged more than just scoring marks. From tinkering with tech as a teenager to diving deep into AI and data, my journey has always been about exploring how things work and how they can be made better. I’m someone who learns by building and failing, then improving until I get it right.",
-    "what’s your #1 superpower?": "My biggest strength is adaptability. Whether it’s switching between different tech stacks or adjusting to fast changing environments, I stay calm, observe quickly, and align myself with what’s needed. I don’t get stuck   I evolve.",
+    "what’s your #1 superpower?": "My biggest strength is adaptability. Whether it’s switching between different tech stacks or adjusting to fast changing environments, I stay calm, observe quickly, and align myself with what’s needed. I don’t get stuck — I evolve.",
     "what are the top 3 areas you’d like to grow in?": "People Skills: I want to become better at leading teams and understanding different working styles.\n\nBusiness Thinking: I’m learning to look at problems not just from a tech angle but also from a customer and ROI perspective.\n\nSystem Design & Scale: I want to deepen my understanding of building large, reliable systems in the AI + data space.",
-    "what misconception do your coworkers have about you?": "Some people think I’m always serious or too focused   but once they get to know me, they realise I’m actually quite fun, collaborative, and always ready to crack a joke or lighten the mood when needed.",
-    "how do you push your boundaries and limits?": "I deliberately take on projects or roles that are slightly out of my comfort zone   ones that force me to stretch and learn fast. I also seek feedback often, reflect deeply, and believe in showing up every day, especially when things get uncomfortable   that’s where real growth happens."
+    "what misconception do your coworkers have about you?": "Some people think I’m always serious or too focused — but once they get to know me, they realise I’m actually quite fun, collaborative, and always ready to crack a joke or lighten the mood when needed.",
+    "how do you push your boundaries and limits?": "I deliberately take on projects or roles that are slightly out of my comfort zone — ones that force me to stretch and learn fast. I also seek feedback often, reflect deeply, and believe in showing up every day, especially when things get uncomfortable — that’s where real growth happens."
 }
 
 personal_data = {
@@ -38,7 +24,7 @@ personal_data = {
         "phone": "+91 9328418263",
         "email": "shilpgohil@gmail.com",
         "github": "https://github.com/shilpgohil",
-        "linkedin": "https://linkedin.com/in/shilp gohil-23b371166"
+        "linkedin": "https://linkedin.com/in/shilpgohil-23b371166"
     },
     "summary": "Skilled software development engineer with experience in delivering scalable applications using Python, Java, and C++ across AWS and GCP environments. Recognised for integrating AI and machine learning.",
     "education": [
